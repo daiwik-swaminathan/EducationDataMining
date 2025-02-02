@@ -115,6 +115,8 @@ def train_and_evaluate_model(df):
     print(f"R^2 Score:         {r2:.4f}")
     print("========================================")
 
+    plot_actual_vs_predicted(y_test, y_pred)
+
     # Return model and feature names for further analysis
     return model, list(X.columns)
 
@@ -203,6 +205,27 @@ def plot_compile_errors_distribution(df):
     plt.xlabel("Grade Band")
     plt.ylabel("Total Compile Errors")
     plt.tight_layout()
+    plt.show()
+
+
+
+
+def plot_actual_vs_predicted(y_test, y_pred):
+    """Plots actual vs predicted final grades to visualize model performance.
+
+    Args:
+        y_test (array-like): Actual X-Grade values.
+        y_pred (array-like): Predicted X-Grade values.
+    """
+    plt.figure(figsize=(8, 6))
+    plt.scatter(y_test, y_pred, alpha=0.7, color="blue", label="Predicted vs Actual")
+    plt.plot([min(y_test), max(y_test)], [min(y_test), max(y_test)], 
+             color="red", linestyle="dashed", linewidth=2, label="Perfect Prediction Line")
+    plt.xlabel("Actual X-Grade")
+    plt.ylabel("Predicted X-Grade")
+    plt.title("Actual vs Predicted Final Grades")
+    plt.legend()
+    plt.grid(True)
     plt.show()
 
 
