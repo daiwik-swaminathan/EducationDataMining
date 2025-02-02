@@ -1,5 +1,4 @@
 import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
@@ -25,20 +24,29 @@ avg_score = main_table.groupby("SubjectID")["Score"].mean().reset_index()
 avg_score.columns = ["SubjectID", "AvgScore"]
 
 # 3. Success Rate (CorrectEventually)
-early_success = early_data.groupby("SubjectID")["CorrectEventually"].mean().reset_index()
+early_success = (
+    early_data.groupby("SubjectID")["CorrectEventually"].mean().reset_index()
+)
 early_success.columns = ["SubjectID", "EarlySuccessRate"]
 
 late_success = late_data.groupby("SubjectID")["CorrectEventually"].mean().reset_index()
 late_success.columns = ["SubjectID", "LateSuccessRate"]
 
 # 4. Compile Errors Frequency
-compile_errors = main_table[main_table["EventType"] == "Compile.Error"].groupby("SubjectID")["EventType"].count().reset_index()
+compile_errors = (
+    main_table[main_table["EventType"] == "Compile.Error"]
+    .groupby("SubjectID")["EventType"]
+    .count()
+    .reset_index()
+)
 compile_errors.columns = ["SubjectID", "CompileErrors"]
 compile_errors["CompileErrors"] = compile_errors["CompileErrors"].fillna(0)
 
 # 5. Time spent (difference between first and last submission)
 main_table["ServerTimestamp"] = pd.to_datetime(main_table["ServerTimestamp"])
-time_spent = main_table.groupby("SubjectID")["ServerTimestamp"].agg(["min", "max"]).reset_index()
+time_spent = (
+    main_table.groupby("SubjectID")["ServerTimestamp"].agg(["min", "max"]).reset_index()
+)
 time_spent["TimeSpent"] = (time_spent["max"] - time_spent["min"]).dt.total_seconds()
 time_spent = time_spent[["SubjectID", "TimeSpent"]]
 
@@ -56,7 +64,9 @@ features = features.dropna()
 # Train-test split
 X = features.drop(columns=["SubjectID", "X-Grade"])
 y = features["X-Grade"]
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
 
 # Train Linear Regression Model
 model = LinearRegression()
