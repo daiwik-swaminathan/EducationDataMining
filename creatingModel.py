@@ -19,8 +19,8 @@ def load_insights_data(
     This dataset is expected to include columns like:
     - SubjectID
     - X-Grade (the target for regression)
-    - Avg_Attempts_early, Success_Rate_early, etc.
-    - Avg_Attempts_late, Success_Rate_late, etc.
+    - Attempts_early, CorrectEventually_early, etc.
+    - Attempts_late, CorrectEventually_late, etc.
     - Avg_Score, Total_Compile_Errors, etc.
 
     Returns:
@@ -38,9 +38,8 @@ def load_insights_data(
 def plot_correlation_matrix(df):
     """Plots a correlation matrix of the numeric columns in the DataFrame.
 
-    # Insight: This tells us how each feature is correlated with others,
-    # including the final grade (X-Grade). High correlations might indicate
-    # predictive power or redundancy among variables.
+    # Insight: Which variables correlate with each other (and with X-Grade)?
+    # This tells us at a glance where strong linear relationships might exist.
 
     Args:
         df (pd.DataFrame): The dataset containing numeric columns.
@@ -75,11 +74,14 @@ def plot_correlation_matrix(df):
 def train_and_evaluate_model(df):
     """Trains and evaluates a Random Forest Regressor to predict X-Grade.
 
-    # Insight: This model will tell us how well our features predict final grades.
-    # We can look at the R^2 score and MSE to gauge predictive power.
+    # Insight: How well do the features predict final grades?
+    # Look at MSE and R^2 to understand the model's performance.
 
     Args:
         df (pd.DataFrame): The dataset containing features and the target (X-Grade).
+
+    Returns:
+        (RandomForestRegressor, list): The trained model and the list of feature columns used.
     """
     # Drop rows with missing target or features
     df = df.dropna(subset=["X-Grade"])  # ensure we have a target
@@ -113,12 +115,99 @@ def train_and_evaluate_model(df):
     print(f"R^2 Score:         {r2:.4f}")
     print("========================================")
 
-    # Return model in case we want to do further analysis
-    return model
+    # Return model and feature names for further analysis
+    return model, list(X.columns)
 
 
 ###########################################################
-# 4. Main Execution
+# 4. Additional Visualizations for Insights
+###########################################################
+
+
+def plot_feature_importances(model, feature_names):
+    """Plots the feature importances from the trained Random Forest model.
+
+    # Insight: Which features are most important in predicting the final grade (X-Grade)?
+    # This bar chart will show the relative importance of each feature.
+
+    Args:
+        model (RandomForestRegressor): The trained random forest model.
+        feature_names (list): List of feature column names used in training.
+    """
+    importances = model.feature_importances_
+
+    # Sort by importance (descending)
+    indices = np.argsort(importances)[::-1]
+    sorted_importances = importances[indices]
+    sorted_features = [feature_names[i] for i in indices]
+
+    plt.figure(figsize=(10, 6))
+    plt.barh(range(len(sorted_importances)), sorted_importances[::-1], color="skyblue")
+    plt.yticks(range(len(sorted_importances)), sorted_features[::-1])
+    plt.title("Feature Importances")
+    plt.xlabel("Importance Score")
+    plt.ylabel("Features")
+    plt.tight_layout()
+    plt.show()
+
+
+def plot_scatter_attempts_early_vs_grade(df):
+    """Plots a scatter diagram of early attempts vs. final grade.
+
+    # Insight: Does making more attempts early in the course correlate with a higher final grade?
+    # This scatter plot will help us see any trend between Attempts_early and X-Grade.
+
+    Args:
+        df (pd.DataFrame): The dataset containing 'Attempts_early' and 'X-Grade'.
+    """
+    # Drop missing values for relevant columns
+    df_plot = df.dropna(subset=["Attempts_early", "X-Grade"])
+
+    plt.figure(figsize=(8, 6))
+    plt.scatter(
+        df_plot["Attempts_early"], df_plot["X-Grade"], alpha=0.7, color="purple"
+    )
+    plt.title("Attempts Early vs. Final Grade")
+    plt.xlabel("Attempts Early")
+    plt.ylabel("X-Grade")
+    plt.grid(True)
+    plt.tight_layout()
+    plt.show()
+
+
+def plot_compile_errors_distribution(df):
+    """Plots a box plot of Total_Compile_Errors for different grade bands.
+
+    # Insight: Do students with higher grades generally have fewer compile errors?
+    # This box plot will show the distribution of compile errors for different grade ranges.
+
+    Args:
+        df (pd.DataFrame): The dataset containing 'Total_Compile_Errors' and 'X-Grade'.
+    """
+    # Drop rows with missing values in relevant columns
+    df_plot = df.dropna(subset=["Total_Compile_Errors", "X-Grade"]).copy()
+
+    # Create grade bands (e.g., [0-0.3], (0.3-0.6], (0.6-0.8], (0.8-1.0])
+    # Adjust these bins as needed for your scale of X-Grade
+    bins = [0, 0.3, 0.6, 0.8, 1.0]
+    labels = ["Low (0-0.3)", "Moderate (0.3-0.6)", "Good (0.6-0.8)", "High (0.8-1.0)"]
+    df_plot["GradeBand"] = pd.cut(
+        df_plot["X-Grade"], bins=bins, labels=labels, include_lowest=True
+    )
+
+    # Boxplot by GradeBand
+    plt.figure(figsize=(8, 6))
+    df_plot.boxplot(column="Total_Compile_Errors", by="GradeBand", grid=False)
+    plt.title("Total Compile Errors Distribution by Grade Band")
+    plt.suptitle("")  # Remove the default boxplot title
+    plt.xlabel("Grade Band")
+    plt.ylabel("Total Compile Errors")
+    plt.tight_layout()
+    plt.show()
+
+
+###########################################################
+# 5. Main Execution
 ###########################################################
 
 
@@ -130,9 +219,16 @@ def main():
     plot_correlation_matrix(df)
 
     # 3. Train and Evaluate an ML Model
-    train_and_evaluate_model(df)
+    model, feature_cols = train_and_evaluate_model(df)
 
-    # Additional steps can be added here
+    # 4. Plot Feature Importances
+    plot_feature_importances(model, feature_cols)
+
+    # 5. Scatter Plot: Attempts Early vs Grade
+    plot_scatter_attempts_early_vs_grade(df)
+
+    # 6. Box Plot: Compile Errors Distribution by Grade Band
+    plot_compile_errors_distribution(df)
 
 
 if __name__ == "__main__":

@@ -23,7 +23,6 @@ pytz==2024.2
 scikit-learn==1.6.1
 scipy==1.15.1
 six==1.17.0
-sklearn==0.0.post7
 threadpoolctl==3.5.0
 tomli==2.2.1
 typing_extensions==4.12.2
