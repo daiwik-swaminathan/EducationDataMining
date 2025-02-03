@@ -7,13 +7,13 @@ import seaborn as sns
 # Question 1
 
 # Open the main file
-df = pd.read_csv('MainTable.csv')
+df = pd.read_csv('Data/MainTable.csv')
 
 # Unique number of Subject IDs in this file
 print(df['SubjectID'].nunique()) # Outputs 413
 
 # Open the subjects file
-df2 = pd.read_csv('Subject.csv')
+df2 = pd.read_csv('Data/LinkTables/Subject.csv')
 
 # Unique number of Subject IDs in this file
 print(df2['SubjectID'].nunique()) # Outputs 372
@@ -21,8 +21,8 @@ print(df2['SubjectID'].nunique()) # Outputs 372
 # Question 2
 
 # Open the two CSV files
-early = pd.read_csv("early.csv") 
-late = pd.read_csv("late.csv")  
+early = pd.read_csv("Data/early.csv") 
+late = pd.read_csv("Data/late.csv")  
 
 # Combine the two datasets
 combined = pd.concat([early, late])
@@ -38,7 +38,7 @@ print(problem_avg_attempts)
 # Question 3
 
 # Open file
-df = pd.read_csv("MainTable.csv")
+df = pd.read_csv("Data/MainTable.csv")
 
 # Filter for rows where Compile.Result is "error"
 errors = df[df["Compile.Result"] == "Error"]
@@ -56,7 +56,7 @@ print(avg_errors_per_problem)
 # Student Struggle Across All Problems
 
 # Open file
-main_table = pd.read_csv("MainTable.csv")
+main_table = pd.read_csv("Data/MainTable.csv")
 
 # Filter for rows where there was compiler error
 errors = main_table[main_table["Compile.Result"] == "Error"]
@@ -97,7 +97,7 @@ plt.show()
 # Submission Time + Box Plots of Score Distribution
 
 # Open file
-main_table = pd.read_csv("MainTable.csv")
+main_table = pd.read_csv("Data/MainTable.csv")
 
 # Convert timestamps to datetime
 main_table["ServerTimestamp"] = pd.to_datetime(main_table["ServerTimestamp"])
