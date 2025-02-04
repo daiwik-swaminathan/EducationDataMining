@@ -56,7 +56,7 @@ python creatingModel.py
 ```
 
 ## **Generated Visualizations**
-After running `creatingModel.py`, these images will appear in the **insights/** folder:
+After running `creatingModel.py`, these images will be displayed
 
 ### **1. Actual vs. Predicted Scores**
 This plot shows how well the model's predicted scores align with actual student exam scores.
