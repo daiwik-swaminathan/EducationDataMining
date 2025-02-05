@@ -3,6 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
+import pytz
 
 # Question 1
 
@@ -99,14 +100,20 @@ plt.show()
 # Open file
 main_table = pd.read_csv("Data/MainTable.csv")
 
-# Convert timestamps to datetime
-main_table["ServerTimestamp"] = pd.to_datetime(main_table["ServerTimestamp"])
+# Convert timestamps to datetime and specify they are in utc
+main_table["ServerTimestamp"] = pd.to_datetime(main_table["ServerTimestamp"], utc=True)
+
+# Convert to east time
+eastern = pytz.timezone("America/New_York")
+main_table["ServerTimestamp"] = main_table["ServerTimestamp"].dt.tz_convert(eastern)
 
 # Filter for only Run.Program events
 run_events = main_table[main_table["EventType"] == "Run.Program"].copy()
 
 # Get hour of submission
 run_events["Hour"] = run_events["ServerTimestamp"].dt.hour
+
+print(main_table["ServerTimestamp"].head())
 
 # Make bar plot
 plt.figure(figsize=(12, 6))
